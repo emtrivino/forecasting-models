@@ -1,0 +1,160 @@
+# import warning for skip warning menssages  
+import warnings  
+# import Sarimax model  
+from statsmodels.tsa.statespace.sarimax import SARIMAX  
+# import for manipulate datetime  
+from datetime import datetime  
+# library for math operations and others   
+import numpy as np  
+#Import the required modules for plot creation  
+import matplotlib.pyplot as plt  
+# Import pandas dataset  
+import pandas as pd  
+# import for search parameters of Sarimax  
+import pmdarima as pm  
+#import the required modules for TimeSeries data generation  
+import statsmodels.api as sm  
+# import adfuller test  
+from statsmodels.tsa.stattools import adfuller  
+# import for customize plots  
+from pylab import rcParams  
+# apply skip warning menssages  
+warnings.filterwarnings("ignore")  
+# Style of plots  
+plt.style.use('fivethirtyeight')  
+  
+#import and create date  
+df= pd.read_csv('datos_de_prueba.csv', sep=';',decimal=',')  
+data = pd.DataFrame(df, columns= ['Fecha','Venta'])  
+data['Fecha']= pd.to_datetime(df['Fecha'])   
+data.set_index('Fecha', inplace=True)  
+data = data.rename_axis(index=None, columns=None)  
+  
+#divide train and test set  
+y_train = (data[data.index < '2019-07-01 '])  
+y_test = (data[data.index >= '2019-07-01 '])  
+  
+#plot y_train data  
+plt.plot(train_array, color ="black", label='train venta',linewidth=1.5)  
+plt.legend()  
+plt.rcParams['axes.facecolor'] = 'white'  
+plt.grid(False)  
+plt.rcParams["figure.facecolor"] ='white'  
+plt.title('Producto GUID “B95750CC-6F89-45A8-A02C-1A26E5041564”')  
+plt.ylabel('Fecha')  
+plt.xlabel('Unidades vendidas')  
+size=20  
+params = {'legend.fontsize': 'large',  
+          'figure.figsize': (20,6),  
+          'axes.labelsize': size,  
+          'axes.titlesize': size,  
+          'xtick.labelsize': size*0.75,  
+          'ytick.labelsize': size*0.75,  
+          'axes.titlepad': 25}  
+plt.rcParams.update(params)  
+plt.show ()  
+  
+# plot y_train data decompose  
+rcParams['figure.figsize'] = 20, 15  
+decomposition = sm.tsa.seasonal_decompose(y_train, model='additive',freq=6)  
+fig = decomposition.plot()  
+plt.rcParams['axes.facecolor'] = 'white'  
+plt.rcParams["figure.facecolor"] ='white'  
+plt.grid(False)  
+plt.rc('font', size=15)   
+plt.rc('xtick', labelsize=15)  
+plt.show()  
+  
+#fuction for obtain statistics informations  
+def tsdiag(y, figsize = (14,8), title = "", lags = 10):  
+    #The data:  
+    tmp_data = pd.Series(y)  
+    #The Ljung-Box test results for the first k lags:  
+    tmp_acor = list(sm_stat.diagnostic.acorr_ljungbox(tmp_data, lags = lags, boxpierce = True))  
+    # get the p-values  
+    p_vals = pd.Series(tmp_acor[1])  
+    #Start the index from 1 instead of 0 (because Ljung-Box test is for lag values from 1 to k)  
+    p_vals.index += 1  
+    fig = plt.figure(figsize = figsize)  
+    #Plot the p-values:  
+    p_vals.plot(ax = fig.add_subplot(313), linestyle='', marker='o', title = "p-values for Ljung-Box statistic", legend = False)  
+    #Add the horizontal 0.05 critical value line  
+    plt.axhline(y = 0.05, color = 'blue', linestyle='--')  
+    # Annotate the p-value points above and to the left of the vertex  
+    x = np.arange(p_vals.size) + 1  
+    for X, Y, Z in zip(x, p_vals, p_vals):  
+        plt.annotate(round(Z, 4), xy=(X,Y), xytext=(-5, 5), ha = 'left', textcoords='offset points')  
+    plt.show()  
+    # Return the statistics:  
+    col_index = ["Ljung-Box: X-squared", "Ljung-Box: p-value", "Box-Pierce: X-squared", "Box-Pierce: p-value"]  
+    return pd.DataFrame(tmp_acor, index = col_index, columns = range(1, len(tmp_acor[0]) + 1))  
+  
+#fuction for plot statistics informations  
+def tsdisplay(y, figsize = (14, 8), title = "", lags = 20):  
+    tmp_data = pd.Series(y)  
+    fig = plt.figure(figsize = figsize)  
+    #Plot the ACF:  
+    sm.graphics.tsa.plot_acf(tmp_data, lags = lags, zero = False, ax = fig.add_subplot(323),  linewidth=1.1)  
+    plt.grid(False)  
+    plt.xticks(np.arange(1,  lags + 1, 1.0))  
+    #Plot the PACF:  
+    sm.graphics.tsa.plot_pacf(tmp_data, lags = lags, zero = False, ax = fig.add_subplot(324), linewidth=1.1)  
+    plt.grid(False)  
+    plt.xticks(np.arange(1,  lags + 1, 1.0))  
+    #Plot the QQ plot of the data:  
+    sm.qqplot(tmp_data, line='s', ax = fig.add_subplot(325), linewidth=0.5)   
+    plt.title("QQ Plot")  
+    plt.grid(False)  
+    #Plot the residual histogram:  
+    fig.add_subplot(326).hist(tmp_data, bins = 40, normed = 1, linewidth=0.5, color='black')  
+    plt.title("Histograma")  
+    #Fix the layout of the plots:  
+    plt.tight_layout()  
+    plt.grid(False)  
+    plt.show()  
+  
+#display information  
+tsdisplay(data.Venta)  
+  
+def TestStationaryPlot(ts):  
+    rol_mean = ts.rolling(window = 6, center = False).mean()  
+    rol_std = ts.rolling(window = 6, center = False).std()  
+    plt.plot(ts, color = 'blue',label = 'Data',linewidth=0.8)  
+    plt.plot(rol_mean, color = 'red', label = 'Media Movil',linewidth=2)  
+    plt.plot(rol_std, color ='black', label = 'Desviación Estandar Movil',linewidth=2)  
+    plt.xticks(fontsize = 10)  
+    plt.yticks(fontsize = 10)  
+      
+    plt.xlabel('Fecha', fontsize = 15)  
+    plt.ylabel('Venta', fontsize = 15)  
+    plt.legend(loc='best', fontsize = 15)  
+    plt.title('Media Movil y Desviación Estandar Movil de la Data', fontsize = 15)  
+    plt.show(block= True)  
+  
+#prediction into y_train  
+pred = results.get_prediction(start=('2019-01-02'), dynamic=False)  
+pred_ci = pred.conf_int()  
+ax = y_train.plot(label='y_train venta',linewidth=1.0,color ="black")  
+pred.predicted_mean.plot(ax=ax, label='Forecast in train set', alpha=5, figsize=(14, 7),linewidth=2.0)  
+  
+ax.fill_between(pred_ci.index,  
+                pred_ci.iloc[:, 0],  
+                pred_ci.iloc[:, 1], color='k', alpha=.2)  
+  
+ax.set_xlabel('Fecha')  
+ax.set_ylabel('Venta')  
+plt.legend()  
+plt.rcParams['axes.facecolor'] = 'white'  
+plt.grid(False)  
+plt.rcParams["figure.facecolor"] ='white'  
+size=20  
+plt.title('Pronóstico dentro de y_train Venta')  
+params = {'legend.fontsize': 'large',  
+          'figure.figsize': (20,8),  
+          'axes.labelsize': size,  
+          'axes.titlesize': size,  
+          'xtick.labelsize': size*0.75,  
+          'ytick.labelsize': size*0.75,  
+          'axes.titlepad': 25}  
+plt.rcParams.update(params)  
+plt.show()  
