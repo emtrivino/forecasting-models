@@ -1,0 +1,157 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn import tree
+from sklearn import svm
+from sklearn.linear_model import LinearRegression
+from sklearn.naive_bayes import GaussianNB
+from sklearn.linear_model import LogisticRegression
+import seaborn as sns
+from matplotlib import pyplot as plt
+
+def regression_model(model, df1, df2, name):
+    x = df1[['FinMes','AntesFeriados','DespuesFeriados','AnoNuevo','Navidad','SemanaSanta','FiestasPatrias','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']]
+    y = df1[["Venta"]]
+    model.fit(x,y)
+    x_test = df2[['FinMes','AntesFeriados','DespuesFeriados','AnoNuevo','Navidad','SemanaSanta','FiestasPatrias','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']]
+    y_test = df2[["Venta"]]
+    predictions = model.predict(x_test)
+    accuracy = model.score(x_test,y_test)
+    print ('Accuracy : %s' % '{0:.3%}'.format(accuracy), name)
+    pred = predictions.ravel()
+    return  pred
+    
+clf1 = svm.SVR()
+clf2 = tree.DecisionTreeRegressor()
+clf3 = GaussianNB()
+clf4 = LogisticRegression()
+
+fit_SVM = regression_model(clf1, df1, df2, "SVM")
+fit_Decision_Tree = regression_model(clf2, df1, df2, "Decision Tree")
+fit_GaussianNB = regression_model(clf3, df1, df2, "GaussianNB")
+fit_Logistic_Regression = regression_model(clf4, df1, df2, "Logistic Regression")
+results_models = pd.DataFrame({ 'fecha':df2["Fecha"],'y_test':df2["Venta"],'fit_SVM':fit_SVM,'fit_Decision_Tree':fit_Decision_Tree,'fit_GaussianNB':fit_GaussianNB,'fit_Logistic_Regression':fit_Logistic_Regression})
+
+plt.plot( results_models.fecha , results_models.fit_SVM, label='fit_SVM' ,linewidth=5.0,color ="red")
+plt.plot(test_array.Venta, color ="black", label='y_test venta',linewidth=1.5)
+plt.legend()
+plt.rcParams['axes.facecolor'] = 'white'
+plt.grid(False)
+plt.rcParams["figure.facecolor"] ='white'
+plt.title('Producto GUID “B95750CC-6F89-45A8-A02C-1A26E5041564” pronóstico para 149 períodos')
+plt.ylabel('Fecha')
+plt.xlabel('Unidades vendidas')
+size=20
+params = {'legend.fontsize': 'large',
+          'figure.figsize': (20,8),
+          'axes.labelsize': size,
+          'axes.titlesize': size,
+          'xtick.labelsize': size*0.75,
+          'ytick.labelsize': size*0.75,
+          'axes.titlepad': 25}
+plt.rcParams.update(params)
+plt.show ()
+
+plt.plot( results_models.fecha , results_models.fit_GaussianNB, label='fit_GaussianNB' ,linewidth=4.0,color ="Purple")
+plt.plot(test_array.Venta, color ="black", label='y_test venta',linewidth=1.5)
+plt.legend()
+plt.rcParams['axes.facecolor'] = 'white'
+plt.grid(False)
+plt.rcParams["figure.facecolor"] ='white'
+plt.title('Producto GUID “B95750CC-6F89-45A8-A02C-1A26E5041564” pronóstico para 149 períodos')
+plt.ylabel('Fecha')
+plt.xlabel('Unidades vendidas')
+size=20
+params = {'legend.fontsize': 'large',
+          'figure.figsize': (20,8),
+          'axes.labelsize': size,
+          'axes.titlesize': size,
+          'xtick.labelsize': size*0.75,
+          'ytick.labelsize': size*0.75,
+          'axes.titlepad': 25}
+plt.rcParams.update(params)
+plt.show ()
+
+plt.plot( results_models.fecha , results_models.fit_Decision_Tree, label='fit_Decision_Tree' ,linewidth=4.0,color ="green")
+plt.plot(test_array.Venta, color ="black", label='y_test venta',linewidth=1.5)
+plt.legend()
+plt.rcParams['axes.facecolor'] = 'white'
+plt.grid(False)
+plt.rcParams["figure.facecolor"] ='white'
+plt.title('Producto GUID “B95750CC-6F89-45A8-A02C-1A26E5041564” pronóstico para 149 períodos')
+plt.ylabel('Fecha')
+plt.xlabel('Unidades vendidas')
+size=20
+params = {'legend.fontsize': 'large',
+          'figure.figsize': (20,8),
+          'axes.labelsize': size,
+          'axes.titlesize': size,
+          'xtick.labelsize': size*0.75,
+          'ytick.labelsize': size*0.75,
+          'axes.titlepad': 25}
+plt.rcParams.update(params)
+plt.show()
+
+plt.plot( results_models.fecha , results_models.fit_Logistic_Regression, label='fit_Logistic_Regression' ,linewidth=4.0,color ="orange")
+plt.plot(test_array.Venta, color ="black", label='y_test venta',linewidth=1.5)
+plt.legend()
+plt.rcParams['axes.facecolor'] = 'white'
+plt.grid(False)
+plt.rcParams["figure.facecolor"] ='white'
+plt.title('Producto GUID “B95750CC-6F89-45A8-A02C-1A26E5041564” pronóstico para 149 períodos')
+plt.ylabel('Fecha')
+plt.xlabel('Unidades vendidas')
+size=20
+params = {'legend.fontsize': 'large',
+          'figure.figsize': (20,8),
+          'axes.labelsize': size,
+          'axes.titlesize': size,
+          'xtick.labelsize': size*0.75,
+          'ytick.labelsize': size*0.75,
+          'axes.titlepad': 25}
+plt.rcParams.update(params)
+plt.show ()
+
+plt.plot( results_models.fecha , fit_pred2['croston_forecast'], label='fit_Croston' ,linewidth=7.0,color ="turquoise")
+plt.plot(test_array.Venta, color ="black", label='y_test venta',linewidth=1.5)
+plt.legend()
+plt.rcParams['axes.facecolor'] = 'white'
+plt.grid(False)
+plt.rcParams["figure.facecolor"] ='white'
+plt.title('Producto GUID “B95750CC-6F89-45A8-A02C-1A26E5041564” pronóstico para 149 períodos')
+plt.ylabel('Fecha')
+plt.xlabel('Unidades vendidas')
+size=20
+params = {'legend.fontsize': 'large',
+          'figure.figsize': (20,8),
+          'axes.labelsize': size,
+          'axes.titlesize': size,
+          'xtick.labelsize': size*0.75,
+          'ytick.labelsize': size*0.75,
+          'axes.titlepad': 25}
+plt.rcParams.update(params)
+plt.show ()
+
+plt.plot( results_models.fecha , fit_pred2['croston_forecast'], label='fit_Croston' ,linewidth=0.8,color ="turquoise")
+plt.plot( results_models.fecha , results_models.fit_Logistic_Regression, label='fit_Logistic_Regression' ,linewidth=1.5,color ="orange")
+plt.plot( results_models.fecha , results_models.fit_Decision_Tree, label='fit_Decision_Tree' ,linewidth=1.5,color ="green")
+plt.plot( results_models.fecha , results_models.fit_SVM, label='fit_SVM' ,linewidth=1.5,color ="red")
+plt.plot( results_models.fecha , results_models.fit_GaussianNB, label='fit_GaussianNB' ,linewidth=1.5,color ="Purple")
+plt.plot( results_models.fecha , results_models.sarima, label='SARIMA(0, 0, 1)x(2, 1, 0, 6)' ,linewidth=3,color ="lime")
+plt.plot(test_array.Venta, color ="black", label='y_test venta',linewidth=4)
+plt.legend()
+plt.rcParams['axes.facecolor'] = 'white'
+plt.grid(False)
+plt.rcParams["figure.facecolor"] ='white'
+plt.title('Producto GUID “B95750CC-6F89-45A8-A02C-1A26E5041564” pronóstico para 149 períodos')
+plt.ylabel('Fecha')
+plt.xlabel('Unidades vendidas')
+size=20
+params = {'legend.fontsize': 'large',
+          'figure.figsize': (20,8),
+          'axes.labelsize': size,
+          'axes.titlesize': size,
+          'xtick.labelsize': size*0.75,
+          'ytick.labelsize': size*0.75,
+          'axes.titlepad': 25}
+plt.rcParams.update(params)
+plt.show ()
