@@ -1,0 +1,58 @@
+#forecasting Croston y_test
+import numpy as np
+import random
+from croston import croston
+import matplotlib.pyplot as plt
+
+fit_pred = croston.fit_croston(y_train, len(y_test),'original')
+fit_pred1 = croston.fit_croston(y_train, len(y_test), 'sba') # Syntetos-Boylan approximation
+fit_pred2 = croston.fit_croston(y_train, len(y_test), 'sbj') # Shale-Boylan-Johnston
+plt.plot(fit_pred2['croston_forecast'])
+plt.plot(y_test.values)
+
+#forecasting Crsoton y_train
+df1=pd.DataFrame({"Date" : y_train.index, "Count" : y_train.Venta})
+df1.reset_index(inplace=True)
+df1=df1.drop('index', 1)
+
+#  q is often called the “demand” and a the “inter-arrival time”.
+q = df1[abs(df1['Count']) > 0.0]['Count']
+demand_times = pd.Series(list(q.index)) + 1
+a = demand_times - demand_times.shift(1).fillna(0.0)
+df2 = pd.DataFrame({'demand_time' : list(demand_times), 'q' : list(q) , 'a' : list(a) })
+
+def get_coeff(alpha , croston_type):
+    if(croston_type == "sba"):
+        return 1.0-(alpha/2.0)
+    elif(croston_type == "sbj"):
+        return (1.0 - alpha/(2.0-alpha))
+    # default 
+    return 1.0
+    
+# q  and a forecast
+alpha = 0.1
+
+df2['q_est'] = None
+df2['a_est'] = None
+
+df2.loc[0 , 'q_est'] = df2['q'][0]
+df2.loc[0,  'a_est'] = df2['a'][0]
+for i in range(df2.shape[0] - 1):
+    q1 = (1.0 - alpha) * df2['q_est'][ i ] + alpha * df2['q'][ i ]
+    a1 = (1.0 - alpha) * df2['a_est'][ i ] + alpha * df2['a'][ i ]
+    df2.loc[i + 1, 'q_est'] = q1
+    df2.loc[i + 1, 'a_est'] = a1
+    
+coeff = get_coeff(alpha , "default")
+df2['forecast'] = coeff * df2['q_est'] / df2['a_est']
+df2
+
+forecast_11 = df2['q_est'][10] / df2['a_est'][10]
+df2['index'] = df2['demand_time'] - 1
+df1 = df1.reset_index()
+df3 = df1.merge(df2 , how='left', on=('index' , 'index'))
+df3
+
+df4 = df3.fillna(method='ffill')
+df4.plot('Date', ['Count' , 'forecast'])
+
